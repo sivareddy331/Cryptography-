@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX_LEN 1000
+
+void encrypt (char *plaintext, char *ciphertext, int key) {
+    int i;
+    for (i = 0; plaintext[i] != '\0'; i++) {
+        char ch = plaintext[i];
+        if (isupper(ch)) {
+            ciphertext[i] = ((ch - 'A' + key) % 26) + 'A';
+        } else if (islower(ch)) {
+            ciphertext[i] = ((ch - 'a' + key) % 26) + 'a';
+        } else {
+            ciphertext[i] = ch; 
+        }
+    }
+    ciphertext[i] = '\0'; 
+}
+int main () {
+    char plaintext [MAX_LEN];
+    char ciphertext [MAX_LEN];
+    int key;
+    printf("Enter a message to encrypt: ");
+    fgets(plaintext, MAX_LEN, stdin);
+    size_t len = strlen(plaintext);
+    if (len > 0 && plaintext [len - 1] == '\n') {
+        plaintext [len - 1] = '\0';
+    }
+    printf("Enter key (1-25): ");
+    scanf("%d", &key);
+    if (key < 1 || key > 25) {
+        printf("Invalid key. Must be between 1 and 25.\n");
+        return 1;
+    }
+    encrypt (plaintext, ciphertext, key);
+    printf("Encrypted message: %s\n", ciphertext);
+    return 0;
+}
