@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+int gcd(int a, int b) {
+    return (b == 0) ? a : gcd(b, a % b);
+}
+int modInverse(int a, int m) {
+    for (int i = 1; i < m; i++)
+        if ((a * i) % m == 1)
+            return i;
+    return -1;
+}
+char decryptChar(char c, int aInv, int b) {
+    if (isupper(c)) {
+        return ((aInv * ((c - 'A' - b + 26)) % 26) + 'A');
+    }
+    return c;
+}
+void decryptText(char *ciphertext, char *plaintext, int a, int b) {
+    int aInv = modInverse(a, 26);
+    if (aInv == -1) {
+        printf("Invalid key: no modular inverse for a = %d\n", a);
+        return;
+    }
+    for (int i = 0; ciphertext[i]; i++) {
+        plaintext[i] = decryptChar(ciphertext[i], aInv, b);
+    }
+    plaintext[strlen(ciphertext)] = '\0';
+}
+int solveAffineKeys(int c1, int p1, int c2, int p2, int *a, int *b) {
+    int dp = (p1 - p2 + 26) % 26;
+    int dc = (c1 - c2 + 26) % 26;
+    int inv = modInverse(dp, 26);
+    if (inv == -1)
+        return 0;
+    *a = (dc * inv) % 26;
+    *b = (c1 - (*a * p1) + 26 * 26) % 26;
+    return 1;
+}
+int main() {
+    char ciphertext[1000], plaintext[1000];
+    int a, b;
+    printf("Enter ciphertext (uppercase letters only):\n");
+    fgets(ciphertext, sizeof(ciphertext), stdin);
+    ciphertext[strcspn(ciphertext, "\n")] = '\0';
+    int c1 = 'B' - 'A'; // 1
+    int c2 = 'U' - 'A'; // 20
+    int p1 = 'E' - 'A'; // 4
+    int p2 = 'T' - 'A'; // 19
+
+    if (!solveAffineKeys(c1, p1, c2, p2, &a, &b)) {
+        printf("Failed to solve affine key equations.\n");
+        return 1;
+    }
+    printf("Guessed keys: a = %d, b = %d\n", a, b);
+    decryptText(ciphertext, plaintext, a, b);
+    printf("Decrypted text:\n%s\n", plaintext);
+    return 0;
+}
