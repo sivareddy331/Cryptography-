@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LEN 1000
+
+void generateFullKey(char *key, int textLen, char *fullKey) {
+    int keyLen = strlen(key);
+    for (int i = 0, j = 0; i < textLen; i++) {
+        if (isalpha(key[j])) {
+            fullKey[i] = toupper(key[j % keyLen]);
+            j++;
+        } else {
+            fullKey[i] = 'A'; 
+        }
+    }
+    fullKey[textLen] = '\0';
+}
+void encrypt (char *plaintext, char *key, char *ciphertext) {
+    int len = strlen(plaintext);
+    char fullKey[MAX_LEN];
+    generateFullKey(key, len, fullKey);
+
+    for (int i = 0; i < len; i++) {
+        char ch = plaintext[i];
+        if (isalpha(ch)) {
+            int shift = fullKey[i] - 'A';
+            if (isupper(ch)) {
+                ciphertext[i] = ((ch - 'A' + shift) % 26) + 'A';
+            } else {
+                ciphertext[i] = ((ch - 'a' + shift) % 26) + 'a';
+            }
+        } else {
+            ciphertext[i] = ch;
+        }
+    }
+    ciphertext[len] = '\0';
+}
+int main() {
+    char plaintext[MAX_LEN], key[MAX_LEN], ciphertext[MAX_LEN];
+    printf("Enter the plaintext: ");
+    fgets(plaintext, MAX_LEN, stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
+    printf("Enter the keyword: ");
+    fgets(key, MAX_LEN, stdin);
+    key[strcspn(key, "\n")] = '\0';
+    encrypt(plaintext, key, ciphertext);
+    printf("Encrypted text: %s\n", ciphertext);
+    return 0;
+}
