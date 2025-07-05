@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int gcd(int a, int b) {
+    return (b == 0) ? a : gcd(b, a % b);
+}
+int modInverse(int a) {
+    for (int i = 1; i < 26; i++) {
+        if ((a * i) % 26 == 1)
+            return i;
+    }
+    return -1; 
+}
+char encryptChar(char ch, int a, int b) {
+    if (isupper(ch))
+        return ((a * (ch - 'A') + b) % 26) + 'A';
+    else if (islower(ch))
+        return ((a * (ch - 'a') + b) % 26) + 'a';
+    return ch;
+}
+char decryptChar(char ch, int aInv, int b) {
+    if (isupper(ch))
+        return ((aInv * ((ch - 'A' - b + 26)) % 26) + 'A');
+    else if (islower(ch))
+        return ((aInv * ((ch - 'a' - b + 26)) % 26) + 'a');
+    return ch;
+}
+void encryptText(char *plaintext, char *ciphertext, int a, int b) {
+    for (int i = 0; plaintext[i] != '\0'; i++) {
+        ciphertext[i] = encryptChar(plaintext[i], a, b);
+    }
+    ciphertext[strlen(plaintext)] = '\0';
+}
+void decryptText(char *ciphertext, char *decrypted, int a, int b) {
+    int aInv = modInverse(a);
+    if (aInv == -1) {
+        printf("Decryption not possible. No modular inverse for a = %d.\n", a);
+        return;
+    }
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        decrypted[i] = decryptChar(ciphertext[i], aInv, b);
+    }
+    decrypted[strlen(ciphertext)] = '\0';
+}
+int main() {
+    char plaintext[1000], ciphertext[1000], decrypted[1000];
+    int a, b;
+    printf("Enter plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
+    printf("Enter values of a and b (a must be coprime with 26): ");
+    scanf("%d %d", &a, &b);
+    if (gcd(a, 26) != 1) {
+        printf("Invalid value of a. It must be coprime with 26.\n");
+        return 1;
+    }
+    encryptText(plaintext, ciphertext, a, b);
+    printf("Encrypted text: %s\n", ciphertext);
+    decryptText(ciphertext, decrypted, a, b);
+    printf("Decrypted text: %s\n", decrypted);
+    return 0;
+}
